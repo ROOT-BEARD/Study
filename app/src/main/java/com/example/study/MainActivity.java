@@ -1,6 +1,8 @@
 package com.example.study;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,5 +22,15 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Button statsButton = findViewById(R.id.stats_button);
+        Button timerButton = findViewById(R.id.timer_button);
+        Button studyButton = findViewById(R.id.study_button);
+        Button setsButton = findViewById(R.id.sets_button);
+
+        timerButton.setOnClickListener(v -> openScreen(TimerActivity.class));
+    }
+    private void openScreen(Class<?> destination) {
+        startActivity(new Intent(this, destination));
     }
 }
