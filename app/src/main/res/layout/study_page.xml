@@ -23,6 +23,7 @@
 
         <TextView
             android:id="@+id/textViewFront"
+            android:padding="10dp"
             android:layout_width="300dp"
             android:layout_height="300dp"
             android:background="#6A6A6A"
@@ -31,6 +32,15 @@
             android:clickable="true"
             android:textColor="@color/black"
             android:textSize="24sp" />
+
+
+        <Button
+            android:id="@+id/buttonSkip"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="50dp"
+            android:text="SKIP"
+            />
 
     </LinearLayout>
 
