@@ -13,10 +13,6 @@ import com.example.study.Database.Database;
 import com.example.study.Services.CardService;
 
 public class MainActivity extends AppCompatActivity {
-
-    Database.Card card = new Database.Card("1", "front", "back", "1");
-    CardService cardService = new CardService();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -27,6 +27,7 @@ public class StudyPage extends AppCompatActivity {
     boolean front = true;
 
     float x = 0.0f;
+    float y = 0.0f;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -64,19 +65,31 @@ public class StudyPage extends AppCompatActivity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getAction()){
                     case MotionEvent.ACTION_DOWN:
-                        x = motionEvent.getX();
+                        x = motionEvent.getRawX();
+                        y = motionEvent.getRawY();
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        frontText.setTranslationX(motionEvent.getRawX() - x);
+                        frontText.setTranslationY(motionEvent.getRawY() - y);
+                        frontText.setRotation((motionEvent.getRawX() - x) * 0.05f);
                         return true;
                     case MotionEvent.ACTION_UP:
-
-                        if(motionEvent.getX() - 10 > x){
+                        if(motionEvent.getRawX() - 200 > x){
                             swipeRight();
                             return true;
                         }
-                        else if(motionEvent.getX() + 10 < x){
+                        else if(motionEvent.getRawX() + 200 < x){
                             swipeLeft();
                             return true;
                         }
-
+                        else{
+                            frontText.animate()
+                            .translationX(0.0f)
+                            .translationY(0.0f)
+                            .rotation(0.0f)
+                            .setDuration(100)
+                            .start();
+                        }
                         front = !front;
                         if(front){
                             frontText.setText(setCards.get(currentCard).front);
@@ -92,10 +105,38 @@ public class StudyPage extends AppCompatActivity {
     }
 
     private void swipeRight(){
-        Toast.makeText(this, "RIGHT", Toast.LENGTH_SHORT).show();
+        swipeCard(true);
     }
 
     private void swipeLeft(){
-        Toast.makeText(this, "LEFT", Toast.LENGTH_SHORT).show();
+        swipeCard(false);
+    }
+
+    private void restockCard(){
+        frontText.setAlpha(0.0f);
+        frontText.setRotation(0.0f);
+        frontText.setTranslationX(0.0f);
+        frontText.setTranslationY(0.0f);
+
+        frontText.animate()
+                .alpha(1.0f)
+                .setDuration(50)
+                .start();
+    }
+
+    private void swipeCard(boolean right){
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        frontText.animate()
+                .translationX(right?screenWidth:-screenWidth)
+                .setDuration(100)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        frontText.postDelayed(()->{
+                            restockCard();
+                        }, 400);
+                    }
+                })
+                .start();
     }
 }
