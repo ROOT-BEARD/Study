@@ -140,7 +140,12 @@ public class StudyPage extends AppCompatActivity {
     }
 
     private void setComplete(){
+        ArrayList<String> learned_ids = new ArrayList<>();
+        for(Database.Card card: learnedCards){
+            learned_ids.add(card.id);
+        }
         Intent intent = new Intent(StudyPage.this, CompletePage.class);
+        intent.putExtra("learned", learned_ids);
         startActivity(intent);
         finish();
     }

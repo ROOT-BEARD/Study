@@ -3,6 +3,8 @@ package com.example.study.Database;
 import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.PropertyName;
 
+import java.sql.Struct;
+
 public class Database {
     public static class Card {
         @DocumentId
@@ -49,6 +51,28 @@ public class Database {
             this.id = id;
             this.set_name = set_name;
             this.uid = uid;
+        }
+    }
+
+    public static class Learned {
+        @DocumentId
+        public String id;
+        @PropertyName("UID")
+        public String user_id;
+        @PropertyName("Card_id")
+        public String card_id;
+
+        public Learned() {}
+
+        public Learned(String user_id, String card_id){
+            this.card_id = card_id;
+            this.user_id = user_id;
+        }
+
+        public Learned(String id, String user_id, String card_id){
+            this.id = id;
+            this.card_id = card_id;
+            this.user_id = user_id;
         }
     }
 }

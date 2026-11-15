@@ -3,11 +3,12 @@ package com.example.study.Services;
 import com.example.study.Database.Database;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CardService {
 
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public void addCard(Database.Card card){
         db.collection("Cards")
@@ -27,6 +28,14 @@ public class CardService {
                     List<Database.Card> cards = queryDocumentSnapshots.toObjects(Database.Card.class);
                     listener.onLoaded(cards);
                 });
+    }
+
+    public static void markLearnedCards(List<String> card_ids){
+        for(String id : card_ids){
+            Database.Learned learned = new Database.Learned("1", id);
+            db.collection("Learned")
+                    .add(learned);
+        }
     }
 
 }

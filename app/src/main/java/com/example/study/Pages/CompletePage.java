@@ -8,9 +8,16 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.study.Database.Database;
 import com.example.study.R;
+import com.example.study.Services.CardService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CompletePage extends AppCompatActivity {
+
+    List<String> learned = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,5 +29,9 @@ public class CompletePage extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        learned = getIntent().getStringArrayListExtra("learned");
+        CardService.markLearnedCards(learned);
+
     }
 }
