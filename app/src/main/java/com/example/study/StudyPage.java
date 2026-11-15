@@ -19,12 +19,16 @@ import java.util.List;
 public class StudyPage extends AppCompatActivity {
 
     private String setId;
-    private TextView frontText;
+    private TextView frontText, progressText;
     private Button skipButton;
     private List<Database.Card> setCards = new ArrayList<>();
+    private List<Database.Card> learnedCards = new ArrayList<>();
     private CardService cardService = new CardService();
     private int currentCard = 0;
     boolean front = true;
+
+    int complete = 0;
+    int total = 0;
 
     float x = 0.0f;
     float y = 0.0f;
@@ -38,6 +42,7 @@ public class StudyPage extends AppCompatActivity {
 
         Toast.makeText(this, "Set Id: " + setId, Toast.LENGTH_SHORT).show();
         frontText = findViewById(R.id.textViewFront);
+        progressText = findViewById(R.id.textProgress);
         skipButton = findViewById(R.id.buttonSkip);
 
         cardService.getCards(setId, new CardService.onCardCallback() {
@@ -45,6 +50,8 @@ public class StudyPage extends AppCompatActivity {
             public void onLoaded(List<Database.Card> cards) {
                 setCards = cards;
                 frontText.setText(setCards.get(currentCard).front);
+                total = setCards.size();
+                progressText.setText((complete + 1) + "/" + total);
 
                 skipButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -106,10 +113,27 @@ public class StudyPage extends AppCompatActivity {
 
     private void swipeRight(){
         swipeCard(true);
+        deleteCard(true);
     }
 
     private void swipeLeft(){
         swipeCard(false);
+        deleteCard(false);
+    }
+
+    private void deleteCard(boolean learned){
+        if(learned) learnedCards.add(setCards.get(currentCard));
+        if(setCards.size() > 1) setCards.remove(currentCard);
+        else {
+            setComplete();
+            return;
+        }
+        complete++;
+        progressText.setText((complete + 1)+ "/" + total);
+    }
+
+    private void setComplete(){
+        Toast.makeText(this, "SET COMPLETE", Toast.LENGTH_SHORT).show();
     }
 
     private void restockCard(){
@@ -117,6 +141,8 @@ public class StudyPage extends AppCompatActivity {
         frontText.setRotation(0.0f);
         frontText.setTranslationX(0.0f);
         frontText.setTranslationY(0.0f);
+        front = true;
+        frontText.setText(setCards.get(currentCard).front);
 
         frontText.animate()
                 .alpha(1.0f)
