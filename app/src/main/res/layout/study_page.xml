@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".StudyPage"
+    tools:context=".Pages.StudyPage"
     >
 
     <LinearLayout
@@ -43,7 +43,6 @@
             android:textSize="24sp"
             android:elevation="10dp"/>
 
-
         <Button
             android:id="@+id/buttonSkip"
             android:layout_width="100dp"
@@ -51,7 +50,21 @@
             android:layout_marginTop="50dp"
             android:text="SKIP"
             />
-
     </LinearLayout>
+    <FrameLayout
+        android:id="@+id/frameLoadingScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="10dp"
+        android:background="@color/white"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

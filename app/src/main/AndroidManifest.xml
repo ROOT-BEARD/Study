@@ -24,8 +24,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".StudyPage"
+            android:name=".Pages.StudyPage"
             android:exported="false" />
+        <activity
+            android:name=".Pages.CompletePage"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

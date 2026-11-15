@@ -1,16 +1,19 @@
-package com.example.study;
+package com.example.study.Pages;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.study.Database.Database;
+import com.example.study.R;
 import com.example.study.Services.CardService;
 
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ public class StudyPage extends AppCompatActivity {
     private String setId;
     private TextView frontText, progressText;
     private Button skipButton;
+    private FrameLayout loadingFrame;
     private List<Database.Card> setCards = new ArrayList<>();
     private List<Database.Card> learnedCards = new ArrayList<>();
     private CardService cardService = new CardService();
@@ -44,6 +48,8 @@ public class StudyPage extends AppCompatActivity {
         frontText = findViewById(R.id.textViewFront);
         progressText = findViewById(R.id.textProgress);
         skipButton = findViewById(R.id.buttonSkip);
+        loadingFrame = findViewById(R.id.frameLoadingScreen);
+        loadingFrame.setVisibility(View.VISIBLE);
 
         cardService.getCards(setId, new CardService.onCardCallback() {
             @Override
@@ -52,6 +58,7 @@ public class StudyPage extends AppCompatActivity {
                 frontText.setText(setCards.get(currentCard).front);
                 total = setCards.size();
                 progressText.setText((complete + 1) + "/" + total);
+                loadingFrame.setVisibility(View.GONE);
 
                 skipButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -133,7 +140,9 @@ public class StudyPage extends AppCompatActivity {
     }
 
     private void setComplete(){
-        Toast.makeText(this, "SET COMPLETE", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(StudyPage.this, CompletePage.class);
+        startActivity(intent);
+        finish();
     }
 
     private void restockCard(){
