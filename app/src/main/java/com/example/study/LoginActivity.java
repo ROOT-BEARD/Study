@@ -1,3 +1,4 @@
+
 package com.example.study;
 
 import android.content.Intent;
@@ -17,31 +18,51 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private TextView registerLink;
 
+    private AuthService authService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        authService = new AuthService();
+
+        // Skip login if a user is already signed in
+        if (authService.isLoggedIn()) {
+            openMainActivity();
+            return;
+        }
+
         setContentView(R.layout.activity_login);
 
+        // Connect UI elements
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
         registerLink = findViewById(R.id.registerLink);
 
+        // Login button
         loginButton.setOnClickListener(v -> loginUser());
 
+        // Navigate to registration
         registerLink.setOnClickListener(v -> {
             Intent intent = new Intent(
                     LoginActivity.this,
                     RegisterActivity.class
             );
+
             startActivity(intent);
         });
     }
 
     private void loginUser() {
-        String email = emailInput.getText().toString().trim();
-        String password = passwordInput.getText().toString();
 
+        String email = emailInput.getText()
+                .toString().trim();
+
+        String password = passwordInput.getText()
+                .toString();
+
+        // Validate email
         if (email.isEmpty()) {
             emailInput.setError("Email is required");
             emailInput.requestFocus();
@@ -54,17 +75,54 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        // Validate password
         if (password.isEmpty()) {
             passwordInput.setError("Password is required");
             passwordInput.requestFocus();
             return;
         }
 
-        // Firebase authentication will be added here later.
-        Toast.makeText(
-                this,
-                "Input validated. Firebase login not connected yet.",
-                Toast.LENGTH_SHORT
-        ).show();
+        // Prevent multiple login attempts
+        loginButton.setEnabled(false);
+
+        // Authenticate with Firebase
+        authService.login(email, password)
+                .addOnCompleteListener(this, task -> {
+
+                    loginButton.setEnabled(true);
+
+                    if (task.isSuccessful()) {
+
+                        Toast.makeText(
+                                LoginActivity.this,
+                                "Login successful!",
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                        openMainActivity();
+
+                    } else {
+
+                        Toast.makeText(
+                                LoginActivity.this,
+                                "Login failed: " +
+                                        (task.getException() != null
+                                                ? task.getException().getMessage()
+                                                : "Unknown error"),
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                });
+    }
+
+    private void openMainActivity() {
+
+        Intent intent = new Intent(
+                LoginActivity.this,
+                MainActivity.class
+        );
+
+        startActivity(intent);
+        finish();
     }
 }

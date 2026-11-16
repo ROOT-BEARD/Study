@@ -1,3 +1,4 @@
+
 package com.example.study;
 
 import android.content.Intent;
@@ -20,40 +21,54 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton;
     private TextView loginLink;
 
+    private AuthService authService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        authService = new AuthService();
+
+        // Connect UI elements
         nameInput = findViewById(R.id.nameInput);
         emailInput = findViewById(R.id.registerEmailInput);
         passwordInput = findViewById(R.id.registerPasswordInput);
-        confirmPasswordInput = findViewById(R.id.confirmPasswordInput);
+        confirmPasswordInput =
+                findViewById(R.id.confirmPasswordInput);
 
         registerButton = findViewById(R.id.registerButton);
         loginLink = findViewById(R.id.loginLink);
 
+        // Create account
         registerButton.setOnClickListener(v -> registerUser());
 
-        loginLink.setOnClickListener(v -> {
-            finish();
-        });
+        // Return to login
+        loginLink.setOnClickListener(v -> finish());
     }
 
     private void registerUser() {
 
-        String name = nameInput.getText().toString().trim();
-        String email = emailInput.getText().toString().trim();
-        String password = passwordInput.getText().toString();
-        String confirmPassword =
-                confirmPasswordInput.getText().toString();
+        String name = nameInput.getText()
+                .toString().trim();
 
+        String email = emailInput.getText()
+                .toString().trim();
+
+        String password = passwordInput.getText()
+                .toString();
+
+        String confirmPassword = confirmPasswordInput
+                .getText().toString();
+
+        // Validate display name
         if (name.isEmpty()) {
             nameInput.setError("Name is required");
             nameInput.requestFocus();
             return;
         }
 
+        // Validate email
         if (email.isEmpty()) {
             emailInput.setError("Email is required");
             emailInput.requestFocus();
@@ -66,6 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        // Validate password
         if (password.length() < 6) {
             passwordInput.setError(
                     "Password must be at least 6 characters"
@@ -74,6 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        // Confirm passwords match
         if (!password.equals(confirmPassword)) {
             confirmPasswordInput.setError(
                     "Passwords do not match"
@@ -82,11 +99,47 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // Firebase registration will be added later.
-        Toast.makeText(
-                this,
-                "Input validated. Firebase registration not connected yet.",
-                Toast.LENGTH_SHORT
-        ).show();
+        // Prevent multiple registration attempts
+        registerButton.setEnabled(false);
+
+        // Create Firebase account
+        authService.register(name, email, password)
+                .addOnCompleteListener(this, task -> {
+
+                    registerButton.setEnabled(true);
+
+                    if (task.isSuccessful()) {
+
+                        Toast.makeText(
+                                RegisterActivity.this,
+                                "Account created successfully!",
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                        openMainActivity();
+
+                    } else {
+
+                        Toast.makeText(
+                                RegisterActivity.this,
+                                "Registration failed: " +
+                                        (task.getException() != null
+                                                ? task.getException().getMessage()
+                                                : "Unknown error"),
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                });
+    }
+
+    private void openMainActivity() {
+
+        Intent intent = new Intent(
+                RegisterActivity.this,
+                MainActivity.class
+        );
+
+        startActivity(intent);
+        finishAffinity();
     }
 }

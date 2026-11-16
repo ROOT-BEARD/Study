@@ -34,6 +34,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.firebase:firebase-auth:24.0.1")
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
