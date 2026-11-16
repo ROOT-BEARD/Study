@@ -1,226 +1,145 @@
 package com.example.study;
 
-import android.media.AudioManager;
-import android.media.ToneGenerator;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.widget.Button;
+import android.os.IBinder;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
+
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import com.example.study.databinding.ActivityTimerBinding;
 
 import java.util.Locale;
 
-/**
- * Runs a Pomodoro timer with focus sessions, short breaks, and long breaks.
- * A long break follows every fourth completed focus session.
- */
 public class TimerActivity extends AppCompatActivity {
 
-    /** The type of timer phase currently running or selected. */
-    private enum Phase {
-        SESSION, SHORT_BREAK, LONG_BREAK
-    }
+    private ActivityTimerBinding binding;
+    private TimerService timerService;
+    private boolean bound;
+    private ActivityResultLauncher<String> notificationPermissionLauncher;
 
-    private TextView timerView;
-    private TextView timerLabel;
-    private EditText sessionInput;
-    private EditText breakInput;
-    private EditText longBreakInput;
-    private Button startStopButton;
 
-    private CountDownTimer countDownTimer;
-    private Phase phase = Phase.SESSION;
-    private long remainingMillis;
-    private int completedSessions;
-    private boolean running;
-    private boolean paused;
-    private ToneGenerator toneGenerator;
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            TimerService.LocalBinder binder = (TimerService.LocalBinder) service;
+            timerService = binder.getService();
+            bound = true;
 
-    /**
-     * Initializes the timer screen and connects its buttons to their actions.
-     *
-     * @param savedInstanceState previously saved activity state
-     */
+            timerService.setListener(TimerActivity.this::showTimerState);
+            setControlsEnabled(true);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            timerService = null;
+            bound = false;
+            setControlsEnabled(false);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timer);
 
-        timerView = findViewById(R.id.timerView);
-        timerLabel = findViewById(R.id.timerLabel);
-        sessionInput = findViewById(R.id.sessionInput);
-        breakInput = findViewById(R.id.breakInput);
-        longBreakInput = findViewById(R.id.longBreakInput);
-        startStopButton = findViewById(R.id.startStopButton);
-        Button resetButton = findViewById(R.id.resetButton);
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
+        binding = ActivityTimerBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        startStopButton.setText(R.string._timer_start);
-        timerView.setText(R.string._session_default);
+        setControlsEnabled(false);
 
-        startStopButton.setOnClickListener(v -> {
-            if (running) {
-                pauseTimer();
-            } else if (paused) {
-                startCountdown(remainingMillis);
+        binding.startStopButton.setOnClickListener(v -> {
+            if (timerService == null) return;
+
+            if (timerService.getTimerState().running) {
+                timerService.pause();
             } else {
-                startNewPhase(phase);
+                requestNotificationPermissionThenStart();
+            }
+
+        });
+
+        binding.timerBackButton.setOnClickListener(v-> onBackPressed());
+
+        binding.resetButton.setOnClickListener(v -> {
+            if (timerService != null) {
+                timerService.reset();
             }
         });
 
-        resetButton.setOnClickListener(v -> resetTimer());
+        notificationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
+                    // Start the timer either way. If permission was denied,
+                    // Android may not show its notification in the notification drawer.
+                    startOrResumeService();
+                });
+
     }
 
-    /**
-     * Selects a timer phase, reads its duration, and starts its countdown.
-     *
-     * @param newPhase the phase to start
-     */
-    private void startNewPhase(Phase newPhase) {
-        phase = newPhase;
-        timerLabel.setText(getPhaseLabel(phase));
+    @Override
+    protected void onStart() {
+        super.onStart();
 
-        EditText durationInput = getInputForPhase(phase);
-        long duration = readDurationMillis(durationInput);
+        Intent serviceIntent = new Intent(this, TimerService.class);
+        bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
 
-        if (duration <= 0) {
-            remainingMillis = 0;
-            timerView.setText("00:00");
-            startStopButton.setText(R.string._timer_start);
+    @Override
+    protected void onStop() {
+        if (bound) {
+            timerService.clearListener();
+            unbindService(serviceConnection);
+            timerService = null;
+            bound = false;
+        }
+
+        super.onStop();
+    }
+
+    private void startOrResumeService() {
+        long sessionMillis = readDurationMillis(binding.sessionInput);
+        long shortBreakMillis = readDurationMillis(binding.breakInput);
+        long longBreakMillis = readDurationMillis(binding.longBreakInput);
+
+        if (sessionMillis <= 0 || shortBreakMillis <= 0 || longBreakMillis <= 0) {
             return;
         }
 
-        remainingMillis = duration;
-        startCountdown(remainingMillis);
+        Intent intent = new Intent(this, TimerService.class)
+                .setAction(TimerService.ACTION_START)
+                .putExtra(TimerService.EXTRA_SESSION_MILLIS, sessionMillis)
+                .putExtra(TimerService.EXTRA_SHORT_BREAK_MILLIS, shortBreakMillis)
+                .putExtra(TimerService.EXTRA_LONG_BREAK_MILLIS, longBreakMillis);
+
+        ContextCompat.startForegroundService(this, intent);
     }
 
-    /**
-     * Starts or resumes a countdown for the specified duration.
-     *
-     * @param durationMillis countdown duration, in milliseconds
-     */
-    private void startCountdown(long durationMillis) {
-        if (durationMillis <= 0) return;
+    private void showTimerState(TimerService.TimerState state) {
+        binding.timerLabel.setText(state.phaseLabel);
+        updateTimerDisplay(state.remainingMillis);
 
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
-
-        paused = false;
-        running = true;
-        startStopButton.setText(R.string._timer_pause);
-
-        countDownTimer = new CountDownTimer(durationMillis, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                remainingMillis = millisUntilFinished;
-                updateTimerDisplay(remainingMillis);
-            }
-
-            @Override
-            public void onFinish() {
-                running = false;
-                paused = false;
-                countDownTimer = null;
-
-                toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 500);
-
-                if (phase == Phase.SESSION) {
-                    completedSessions++;
-                    phase = completedSessions % 4 == 0
-                            ? Phase.LONG_BREAK
-                            : Phase.SHORT_BREAK;
-                } else {
-                    phase = Phase.SESSION;
-                }
-
-                timerLabel.setText(getPhaseLabel(phase));
-                remainingMillis = readDurationMillis(getInputForPhase(phase));
-                updateTimerDisplay(Math.max(remainingMillis, 0));
-                startStopButton.setText(R.string._timer_start);
-            }
-
-        }.start();
+        binding.startStopButton.setText(
+                state.running ? R.string._timer_pause : R.string._timer_start);
     }
 
-    /** Pauses the current countdown while preserving its remaining time. */
-    private void pauseTimer() {
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-            countDownTimer = null;
-        }
+    private void setControlsEnabled(boolean enabled) {
+        if (binding == null) return;
 
-        running = false;
-        paused = true;
-        startStopButton.setText(R.string._timer_start);
+        binding.startStopButton.setEnabled(enabled);
+        binding.resetButton.setEnabled(enabled);
     }
 
-    /**
-     * Cancels the countdown and resets the timer to the session duration.
-     * Also clears the completed-session count.
-     */
-    private void resetTimer() {
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-            countDownTimer = null;
-        }
-
-        running = false;
-        paused = false;
-        completedSessions = 0;
-        phase = Phase.SESSION;
-        timerLabel.setText(getPhaseLabel(phase));
-        startStopButton.setText(R.string._timer_start);
-
-        remainingMillis = readDurationMillis(sessionInput);
-        updateTimerDisplay(Math.max(remainingMillis, 0));
-    }
-
-    /**
-     * Gets the input field associated with a timer phase.
-     *
-     * @param phase the phase whose input field is needed
-     * @return the duration input field for that phase
-     */
-    private EditText getInputForPhase(Phase phase) {
-        switch (phase) {
-            case SHORT_BREAK:
-                return breakInput;
-            case LONG_BREAK:
-                return longBreakInput;
-            case SESSION:
-            default:
-                return sessionInput;
-        }
-    }
-
-    /**
-     * Gets the display label for a timer phase.
-     *
-     * @param phase the phase to label
-     * @return the label displayed for the phase
-     */
-    private String getPhaseLabel(Phase phase) {
-        switch (phase) {
-            case SHORT_BREAK:
-                return "Break";
-            case LONG_BREAK:
-                return "Long Break";
-            case SESSION:
-            default:
-                return "Session";
-        }
-    }
-
-    /**
-     * Parses a duration from an input field. Accepts MM:SS or a
-     * number of minutes, such as 25.
-     *
-     * @param input the field containing the duration
-     * @return the duration in milliseconds, or {@code 0} if invalid
-     */
     private long readDurationMillis(EditText input) {
         String value = input.getText().toString().trim();
 
@@ -249,33 +168,37 @@ public class TimerActivity extends AppCompatActivity {
 
             input.setError(null);
             return duration;
-
         } catch (NumberFormatException e) {
             input.setError("Enter a duration like 25:00");
             return 0;
         }
     }
 
-    /**
-     * Displays a duration as minutes and seconds in the timer text view.
-     *
-     * @param millis duration to display, in milliseconds
-     */
     private void updateTimerDisplay(long millis) {
         long totalSeconds = (millis + 999) / 1000;
         long minutes = totalSeconds / 60;
         long seconds = totalSeconds % 60;
 
-        timerView.setText(String.format(
+        binding.timerView.setText(String.format(
                 Locale.getDefault(), "%02d:%02d", minutes, seconds));
     }
 
-    /** Cancels the countdown when the activity is destroyed. */
     @Override
     protected void onDestroy() {
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
+        binding = null;
         super.onDestroy();
+    }
+
+    private void requestNotificationPermissionThenStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            notificationPermissionLauncher.launch(
+                    Manifest.permission.POST_NOTIFICATIONS);
+        } else {
+            startOrResumeService();
+        }
     }
 }
