@@ -63,8 +63,9 @@ public class StudyPage extends AppCompatActivity {
                 skipButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(currentCard < setCards.size() - 1) currentCard++;
-                        else currentCard = 0;
+                        if(setCards.isEmpty() || setCards == null) return;
+
+                        currentCard = (currentCard + 1) % setCards.size();
 
                         front = true;
                         frontText.setText(setCards.get(currentCard).front);
@@ -135,6 +136,11 @@ public class StudyPage extends AppCompatActivity {
             setComplete();
             return;
         }
+
+        if(currentCard >= setCards.size()) currentCard = 0;
+
+        front = true;
+        frontText.setText(setCards.get(currentCard).front);
         complete++;
         progressText.setText((complete + 1)+ "/" + total);
     }

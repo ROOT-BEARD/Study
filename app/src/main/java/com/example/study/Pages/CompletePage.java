@@ -31,7 +31,7 @@ public class CompletePage extends AppCompatActivity {
         });
 
         learned = getIntent().getStringArrayListExtra("learned");
-        CardService.markLearnedCards(learned);
+        //CardService.markLearnedCards(learned);
 
     }
 }
