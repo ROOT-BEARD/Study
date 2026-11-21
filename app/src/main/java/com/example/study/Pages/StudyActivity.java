@@ -19,7 +19,7 @@ import com.example.study.Services.CardService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StudyPage extends AppCompatActivity {
+public class StudyActivity extends AppCompatActivity {
 
     private String setId;
     private TextView frontText, progressText;
@@ -150,7 +150,7 @@ public class StudyPage extends AppCompatActivity {
         for(Database.Card card: learnedCards){
             learned_ids.add(card.id);
         }
-        Intent intent = new Intent(StudyPage.this, CompletePage.class);
+        Intent intent = new Intent(StudyActivity.this, CompleteActivity.class);
         intent.putExtra("learned", learned_ids);
         startActivity(intent);
         finish();

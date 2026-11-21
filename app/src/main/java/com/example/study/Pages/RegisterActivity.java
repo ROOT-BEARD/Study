@@ -1,5 +1,5 @@
 
-package com.example.study;
+package com.example.study.Pages;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.study.R;
+import com.example.study.Services.AuthService;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -44,7 +47,11 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton.setOnClickListener(v -> registerUser());
 
         // Return to login
-        loginLink.setOnClickListener(v -> finish());
+        loginLink.setOnClickListener(v -> {
+            //added switching to login page
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void registerUser() {

@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,15 +16,46 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Study">
         <activity
-            android:name=".MainActivity"
+            android:name=".Pages.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".Pages.TimerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Pages.StudyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Pages.CompleteActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+
+        <activity
+            android:name=".Pages.LoginActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
+            android:name=".Pages.RegisterActivity"
+            android:exported="false" />
+
+
+        <service
+            android:name=".TimerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="User-started Pomodoro timer with an ongoing countdown notification" />
+        </service>
+
     </application>
 
 </manifest>

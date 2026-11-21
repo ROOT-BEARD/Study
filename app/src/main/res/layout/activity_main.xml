@@ -5,7 +5,14 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".Pages.MainActivity">
+
+    <Button
+        android:id="@+id/buttonAuth"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:text="AUTH"
+        />
 
     <Button
         android:id="@+id/stats_button"

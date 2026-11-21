@@ -18,6 +18,8 @@ import android.os.SystemClock;
 
 import androidx.core.app.NotificationCompat;
 
+import com.example.study.Pages.TimerActivity;
+
 import java.util.Locale;
 
 public class TimerService extends Service {

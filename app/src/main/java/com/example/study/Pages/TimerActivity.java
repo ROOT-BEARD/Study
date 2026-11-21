@@ -1,4 +1,4 @@
-package com.example.study;
+package com.example.study.Pages;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -16,8 +16,9 @@ import androidx.core.content.ContextCompat;
 
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
+import com.example.study.R;
+import com.example.study.TimerService;
 import com.example.study.databinding.ActivityTimerBinding;
 
 import java.util.Locale;
