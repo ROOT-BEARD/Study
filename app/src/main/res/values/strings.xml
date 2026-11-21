@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Study</string>
+    <string name="_long_break_default">15:00</string>
+    <string name="_short_break_default">5:00</string>
+    <string name="_session_default">25:00</string>
+    <string name="_timer_start">Start</string>
+    <string name="_timer_pause">Pause</string>
 </resources>
