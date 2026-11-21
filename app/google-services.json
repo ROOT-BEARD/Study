@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "457050171822",
+    "firebase_url": "https://study-ed3fb-default-rtdb.firebaseio.com",
+    "project_id": "study-ed3fb",
+    "storage_bucket": "study-ed3fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457050171822:android:65dc912dc77df070d0403f",
+        "android_client_info": {
+          "package_name": "com.example.study"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACuic-uCaNOXGrTuQdIDAJgUhnURRo28I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
