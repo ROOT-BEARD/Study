@@ -3,6 +3,8 @@ package com.example.study.Pages;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -30,10 +32,11 @@ public class StudyActivity extends AppCompatActivity {
     private CardService cardService = new CardService();
     private int currentCard = 0;
     boolean front = true;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     int complete = 0;
     int total = 0;
-
+    int seconds = 0;
     float x = 0.0f;
     float y = 0.0f;
 
@@ -73,6 +76,8 @@ public class StudyActivity extends AppCompatActivity {
                 });
             }
         });
+
+        startStopwatch();
 
 
         frontText.setOnTouchListener(new View.OnTouchListener() {
@@ -152,6 +157,9 @@ public class StudyActivity extends AppCompatActivity {
         }
         Intent intent = new Intent(StudyActivity.this, CompleteActivity.class);
         intent.putExtra("learned", learned_ids);
+        intent.putExtra("setId", setId);
+        intent.putExtra("seconds", seconds);
+        intent.putExtra("totalCards", total);
         startActivity(intent);
         finish();
     }
@@ -166,7 +174,7 @@ public class StudyActivity extends AppCompatActivity {
 
         frontText.animate()
                 .alpha(1.0f)
-                .setDuration(50)
+                .setDuration(10)
                 .start();
     }
 
@@ -184,5 +192,20 @@ public class StudyActivity extends AppCompatActivity {
                     }
                 })
                 .start();
+    }
+
+    private void startStopwatch() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                seconds++;
+                handler.postDelayed(this, 1000);
+            }
+        });
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
     }
 }
