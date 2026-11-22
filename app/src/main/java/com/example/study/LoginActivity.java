@@ -1,4 +1,3 @@
-
 package com.example.study;
 
 import android.content.Intent;
@@ -10,6 +9,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.study.R;
+import com.example.study.AuthService;
 
 public class LoginActivity extends AppCompatActivity {
 

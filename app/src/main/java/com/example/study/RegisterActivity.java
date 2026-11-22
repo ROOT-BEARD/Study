@@ -1,6 +1,7 @@
 
 package com.example.study;
 
+import com.example.study.MainActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
