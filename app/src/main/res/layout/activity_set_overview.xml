@@ -25,19 +25,27 @@
             />
 
         <Button
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:id="@+id/buttonStudy"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:background="@drawable/oval"
             android:text="STUDY"
             android:textStyle="bold"
             android:textSize="16sp"
             />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_cards"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
 
-
-
-
-
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
