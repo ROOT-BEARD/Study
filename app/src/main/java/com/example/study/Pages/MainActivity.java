@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         timerButton.setOnClickListener(v -> openScreen(TimerActivity.class));
         authButton.setOnClickListener(v -> openScreen(RegisterActivity.class));
-        setsButton.setOnClickListener(v -> openScreen(SetOverviewActivity.class));
+        setsButton.setOnClickListener(v -> openScreen(CardOverviewActivity.class));
         studyButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, StudyActivity.class);
             intent.putExtra("setId", "1");

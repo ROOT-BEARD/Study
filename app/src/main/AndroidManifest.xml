@@ -54,6 +54,10 @@
         </service>
 
         <activity
+            android:name=".Pages.CardOverviewActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".Pages.SetOverviewActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
